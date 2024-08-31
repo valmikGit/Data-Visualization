@@ -4,6 +4,9 @@ Data visualization of the Google Play store apps' dataset.
 
 # Preprocessing and information we gathered before we began data visualization
 
+## Preprocessing:
+- THIS IS PENDING.
+
 ## Categorical Variables:
 - Category
 - Installs

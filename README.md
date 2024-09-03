@@ -5,7 +5,12 @@ Data visualization of the Google Play store apps' dataset.
 # Preprocessing and information we gathered before we began data visualization
 
 ## Preprocessing:
-- THIS IS PENDING.
+- Drop rows with null values.
+- Drop rows with size or minimum android version = "Varies with device"
+- Convert all sizes to the same units
+- Remove android version specifications with no. of apps < 1000 (outliers)
+- Delete unnecessary columns
+- We checked whether the columns 'Installs' and 'Minimum Installs' convey the same information. We were correct and thus, we decided to drop the column 'Installs'.
 
 ## Categorical Variables:
 - Category
@@ -29,3 +34,26 @@ Data visualization of the Google Play store apps' dataset.
 - currency
 - released
 - last updated
+
+# Visualizations:
+## Visualization 1 - Top 10 categories by average rating and average maximum installs:
+### Part A: Top 10 categories by average category:
+- Found the unique entries in the column 'Category'.
+- For each unique category, calculated the average rating = (summation(rating count * rating))/(summation(rating count)). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
+- Arranged the categories, in descending order, with respect to their average rating and found the top 10.
+- Made a bar graph of Average Rating vs Categories (top 10).
+### Part B: Top 10 categories by average maximum installs:
+- Found the unique entries in the column 'Category'.
+- For each unique category, calculated the maximum installs = (summation(maximum installs))/(number of filtered rows). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
+- Arranged the categories, in descending order, with respect to their average maximum installs and found the top 10.
+- Made a bar graph of Average Maximum Installs vs Categories (top 10).
+
+## Visualization 2 - Finding success of apps based on their content rating by calculating average rating and average maximum installs:
+### Part A: Success of apps based on their content rating by calculating average rating:
+- Found the unique entries in the column 'Content Rating'.
+- For each unique content rating, calculated the average rating = (summation(rating count * rating))/(summation(rating count)). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
+- Made a bar graph of Average Rating vs Content Rating.
+### Part A: Success of apps based on their content rating by calculating average maximum installs:
+- Found the unique entries in the column 'Content Rating'.
+- For each unique content rating, calculated the maximum installs = (summation(maximum installs))/(number of filtered rows). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
+- Made a bar graph of Average Maximum Installs vs Content Rating.

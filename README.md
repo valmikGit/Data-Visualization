@@ -36,7 +36,8 @@ Data visualization of the Google Play store apps' dataset.
 - last updated
 
 # Visualizations:
-## Visualization 1 - Top 10 categories by average rating:
+## Visualization 1 - Top 10 categories by average rating and maximum installs:
+### Part A: Top 10 categories by average category:
 - Found the unique entries in the column 'Category'.
 - For each unique category, calculated the average rating = (summation(rating count * rating))/(summation(rating count)). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
 - Arranged the categories, in descending order, with respect to their average rating and found the top 10.

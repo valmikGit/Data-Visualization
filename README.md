@@ -43,7 +43,7 @@ Data visualization of the Google Play store apps' dataset.
 - Arranged the categories, in descending order, with respect to their average rating and found the top 10.
 - Made a bar graph of Average Rating vs Categories (top 10).
 - Our hypothesis: The number 1 category based on average rating would be Shopping. However, we realized that Parenting is the category which is on top.
-- Inference: The top 10 categories based on average rating (from number 1 to number 10): Parenting, Health and fitness, Books and reference, Art and Design, Weather, Shoppping, Word, Casino, Music and Audio and Photography.
+- Inference: The top 10 categories based on average rating (from number 1 to number 10): Parenting, Health and fitness, Books and reference, Art and Design, Weather, Shoppping, Word, Casino, Music and Audio, Photography.
 ### Part B: Top 10 categories by average maximum installs:
 - Found the unique entries in the column 'Category'.
 - For each unique category, calculated the maximum installs = (summation(maximum installs))/(number of filtered rows). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
@@ -58,8 +58,10 @@ Data visualization of the Google Play store apps' dataset.
 - For each unique content rating, calculated the average rating = (summation(rating count * rating))/(summation(rating count)). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
 - Made a bar graph of Average Rating vs Content Rating.
 - Our hypothesis: The number 1 content rating based on average rating would be Everyone. Our hypothesis was corrrect.
+- Inference: The order of the content rating, based on average rating, from topmost to bottommost is Everyone, Teen, Everyone 10+, Mature 17+, Adults only 18+ and Unrated.
 ### Part A: Success of apps based on their content rating by calculating average maximum installs:
 - Found the unique entries in the column 'Content Rating'.
 - For each unique content rating, calculated the maximum installs = (summation(maximum installs))/(number of filtered rows). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
 - Made a bar graph of Average Maximum Installs vs Content Rating.
 - Our hypothesis: The number 1 content rating based on average rating would be Everyone. Our hypothesis was corrrect.
+- Inference: The order of the content rating, based on average rating, from topmost to bottommost is Everyone, Teen, Everyone 10+, Mature 17+, Adults only 18+ and Unrated.

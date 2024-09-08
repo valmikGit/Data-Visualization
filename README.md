@@ -36,6 +36,7 @@ Data visualization of the Google Play store apps' dataset.
 - last updated
 
 # Visualizations:
+- Average rating and average maximum installs, in our opinion, are excellent indicators to judge a category of apps. They can be used to judge how successful a particular category is. We mentioned the top 10 because of the large number of categories of apps.
 ## Visualization 1 - Top 10 categories by average rating and average maximum installs:
 ### Part A: Top 10 categories by average rating:
 - Found the unique entries in the column 'Category'.

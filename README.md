@@ -66,7 +66,7 @@ Data visualization of the Google Play store apps' dataset.
 - Inference: The order of the content rating, based on average rating, from topmost to bottommost is Everyone, Teen, Everyone 10+, Mature 17+, Adults only 18+ and Unrated.
 - Marks and Channels: Mark used is Line. Channel used is Length/Position. I chose this combination of mark and channel because I think, by using this combination, it is very easy to interpret the information given by the visualization.
 - Type of variables used: The Y-axis has average rating which is numerical derived out of the numerical variables 'Rating Count' and 'Rating'. The X-axis has the categorical variable 'Content Rating'.
-### Part A: Success of apps based on their content rating by calculating average maximum installs:
+### Part B: Success of apps based on their content rating by calculating average maximum installs:
 - Found the unique entries in the column 'Content Rating'.
 - For each unique content rating, calculated the maximum installs = (summation(maximum installs))/(number of filtered rows). Here, summation implies the sum of the mentioned quantity over all the filtered rows.
 - Made a bar graph of Average Maximum Installs vs Content Rating.

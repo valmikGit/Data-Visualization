@@ -74,4 +74,4 @@ Data visualization of the Google Play store apps' dataset.
 - Inference: The order of the content rating, based on average rating, from topmost to bottommost is Everyone, Teen, Everyone 10+, Mature 17+, Adults only 18+ and Unrated.
 - Marks and Channels: Mark used is Line. Channel used is Length/Position. I chose this combination of mark and channel because I think, by using this combination, it is very easy to interpret the information given by the visualization.
 - Type of variables used: The Y-axis has average maxiumum installs which is numerical derived out of the numerical variable 'Maximum Installs'. The X-axis has the categorical variable 'Content Rating'.
-- - I have used average maximum installs instead of maximum installs to find the typical/most expected value of 'Maximum Installs'.
+- I have used average maximum installs instead of maximum installs to find the typical/most expected value of 'Maximum Installs'.

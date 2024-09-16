@@ -1,13 +1,10 @@
-# %%
 import pandas as pd
 import numpy as np
 
-# %%
 df = pd.read_csv("Google-Playstore-Preprocessed.csv")
 
 # VISUALIZATION 2
 
-# %%
 # Finding the top 10 categories by average maximum installs
 unique_Categories = df['Category'].unique()
 result:dict = {}
@@ -22,7 +19,6 @@ for category in unique_Categories:
 top_10 = sorted(result.items(), key=lambda x: x[1], reverse=True)[:10]
 print(top_10)
 
-# %%
 import matplotlib.pyplot as plt
 categories:list = []
 values: list = []

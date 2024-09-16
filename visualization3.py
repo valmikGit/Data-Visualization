@@ -1,8 +1,6 @@
-# %%
 import pandas as pd
 import numpy as np
 
-# %%
 df = pd.read_csv("Google-Playstore-Preprocessed.csv")
 
 # VISUALIZATION 3
@@ -24,7 +22,6 @@ for content in contents:
 for key, value in result.items():
     print(f'{key}: {value}')
 
-# %%
 import matplotlib.pyplot as plt
 categories:list = []
 values: list = []

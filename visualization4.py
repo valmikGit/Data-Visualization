@@ -1,13 +1,10 @@
-# %%
 import pandas as pd
 import numpy as np
 
-# %%
 df = pd.read_csv("Google-Playstore-Preprocessed.csv")
 
 # VISUALIZATION 4
 
-# %%
 # Finding the success of apps based for different content ratings based on average maximum installs
 contents = df['Content Rating'].unique()
 result:dict = {}
@@ -22,7 +19,6 @@ for content in contents:
 for key, value in result.items():
     print(f'{key}: {value}')
 
-# %%
 import matplotlib.pyplot as plt
 categories:list = []
 values: list = []

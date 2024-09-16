@@ -77,3 +77,16 @@ Data visualization of the Google Play store apps' dataset.
 - Marks and Channels: Mark used is Line. Channel used is Length/Position. I chose this combination of mark and channel because I think, by using this combination, it is very easy to interpret the information given by the visualization.
 - Type of variables used: The Y-axis has average maxiumum installs which is numerical derived out of the numerical variable 'Maximum Installs'. The X-axis has the categorical variable 'Content Rating'.
 - I have used average maximum installs instead of maximum installs to find the typical/most expected value of 'Maximum Installs'.
+
+## Images in our LaTeX report and the corresponding .py file:
+- Figure 17: visualization1.py
+- Figure 18: visualization2.py
+- Figure 19: visualization3.py
+- Figure 20: visualization4.py
+
+## How to run the code?
+- python processing.py
+- python visualization1.py
+- python visualization2.py
+- python visualization3.py
+- python visualization4.py

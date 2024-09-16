@@ -87,15 +87,20 @@ Data visualization of the Google Play store apps' dataset.
 ## How to run the code?
 ```bash
 python processing.py
+```bash
 
 ```bash
 python visualization1.py
+```bash
 
 ```bash
 python visualization2.py
+```bash
 
 ```bash
 python visualization3.py
+```bash
 
 ```bash
 python visualization4.py
+```bash

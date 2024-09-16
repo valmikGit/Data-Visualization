@@ -74,6 +74,7 @@ df
 # Convert the processed dataframe to a csv file.
 df.to_csv("Google-Playstore-Preprocessed.csv")
 
+# VISUALIZATION 1
 # %%
 # Finding the top 10 categories by rating
 unique_Categories = df['Category'].unique()
@@ -122,6 +123,8 @@ plt.xticks(rotation=90)
 
 # Display the plot
 plt.show()
+
+# VISUALIZATION 2
 
 # %%
 # Finding the top 10 categories by average maximum installs
@@ -173,6 +176,7 @@ plt.xticks(rotation=90)
 # Display the plot
 plt.show()
 
+# VISUALIZATION 3
 # %%
 df['Content Rating'].unique()
 
@@ -225,6 +229,8 @@ plt.xticks(rotation=90)
 
 # Display the plot
 plt.show()
+
+# VISUALIZATION 4
 
 # %%
 # Finding the success of apps based for different content ratings based on average maximum installs

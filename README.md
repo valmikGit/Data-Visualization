@@ -85,8 +85,22 @@ Data visualization of the Google Play store apps' dataset.
 - Figure 20: visualization4.py
 
 ## How to run the code?
-- python processing.py
-- python visualization1.py
-- python visualization2.py
-- python visualization3.py
-- python visualization4.py
+```bash
+python processing.py
+```
+
+```bash
+python visualization1.py
+```
+
+```bash
+python visualization2.py
+```
+
+```bash
+python visualization3.py
+```
+
+```bash
+python visualization4.py
+```

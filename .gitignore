@@ -2,3 +2,13 @@ dvenv
 *.csv
 *.png
 *.nc
+*.circles
+*.edges
+*.egofeat
+*.feat
+*.featnames
+*.txt
+*.gz
+*.json
+CountorMapping.ipynb
+*.crdownload

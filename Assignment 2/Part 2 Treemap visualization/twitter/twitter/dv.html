@@ -15,25 +15,78 @@
             .then(data => {
                 console.log("Raw Data:", data);
 
-                // Filter out records missing required fields
-                const filteredData = data.filter(item => item.circles && item.source !== undefined && item.target !== undefined);
+                // Filter to include only records with necessary data
+                const filteredData = data.filter(item => 
+                    item.source !== undefined && item.target !== undefined && 
+                    item.source !== null && item.target !== null
+                );
                 console.log("Filtered Data:", filteredData);
 
-                // Define a unique root item manually
-                const labels = ["Root"].concat(filteredData.map(item => item.circles || "Unknown"));
-                const parents = [""].concat(filteredData.map(item => item.source || "Root"));
-                const values = [0].concat(filteredData.map(item => item.target ? parseFloat(item.target) : 1));
+                // Set up labels, parents, and values for the tree map
+                const labels = ["Root"];
+                const parents = [""];
+                const values = [0]; // Set a default value for root
+                const nodeMapping = {}; // Track which labels have been added and their parents
+                const ambiguousNodes = new Set(); // Track ambiguous nodes
+
+                // Add nodes for each edge relationship in the data
+                filteredData.forEach(item => {
+                    const sourceLabel = item.source.toString();
+                    const targetLabel = item.target.toString();
+
+                    // Map source and check for uniqueness
+                    if (!nodeMapping[sourceLabel]) {
+                        nodeMapping[sourceLabel] = "Root"; // Map the source to the root
+                        labels.push(sourceLabel);
+                        parents.push("Root");  // Root is the parent of top-level sources
+                        values.push(1);  // Set a base value for each new node
+                    }
+
+                    // Map target and check for ambiguity
+                    if (!nodeMapping[targetLabel]) { 
+                        labels.push(targetLabel);
+                        parents.push(sourceLabel);
+                        values.push(1); // Set a default value or adjust based on your data
+                        nodeMapping[targetLabel] = sourceLabel; // Map target to its source parent
+                    } else if (nodeMapping[targetLabel] !== sourceLabel) {
+                        console.warn(`Ambiguity detected for target: ${targetLabel} with parents ${nodeMapping[targetLabel]} and ${sourceLabel}`);
+                        ambiguousNodes.add(targetLabel); // Track ambiguous node
+                    }
+                });
+
+                // Identify orphan nodes (nodes without a parent)
+                const orphanNodes = new Set(labels.filter(label => 
+                    !nodeMapping[label] || ambiguousNodes.has(label) || label === "Root"
+                ));
+
+                // Filter out ambiguous and orphan nodes
+                const filteredLabels = [];
+                const filteredParents = [];
+                const filteredValues = [];
+
+                labels.forEach((label, index) => {
+                    if (!ambiguousNodes.has(label) && !orphanNodes.has(label) && label !== "Root") {
+                        filteredLabels.push(label);
+                        filteredParents.push(parents[index]);
+                        filteredValues.push(values[index]);
+                    }
+                });
+
+                // Log the constructed arrays for debugging
+                console.log("Filtered Labels:", filteredLabels);
+                console.log("Filtered Parents:", filteredParents);
+                console.log("Filtered Values:", filteredValues);
 
                 const trace = {
                     type: "treemap",
-                    labels: labels,
-                    parents: parents,
-                    values: values,
+                    labels: filteredLabels,
+                    parents: filteredParents,
+                    values: filteredValues,
                     textinfo: "label+value+percent parent"
                 };
 
                 const layout = {
-                    title: "Tree Map Visualization of Combined Data",
+                    title: "Tree Map Visualization of Edge Relationships",
                     width: 800,
                     height: 600
                 };

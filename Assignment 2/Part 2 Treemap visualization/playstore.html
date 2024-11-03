@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Treemap Visualizations</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js" async defer></script>
+    <style>
+        /* Flexbox container to display rows of treemaps */
+        .treemap-row {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        /* Style for each treemap container */
+        .treemap-container {
+            width: 48%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="treemapRow1" class="treemap-row">
+        <div id="treemap1" class="treemap-container"></div>
+        <div id="treemap2" class="treemap-container"></div>
+    </div>
+    <div id="treemapRow2" class="treemap-row">
+        <div id="treemap3" class="treemap-container"></div>
+        <div id="treemap4" class="treemap-container"></div>
+    </div>
+    <div id="treemapRow3" class="treemap-row">
+        <div id="treemap5" class="treemap-container"></div>
+        <div id="treemap6" class="treemap-container"></div>
+    </div>
+
+    <script async>
+        async function loadTreemaps() {
+            try {
+                // Load JSON data and parse it
+                const response = await fetch('treemap_data.json');
+                const data = await response.json();
+                
+                const limitedData = data.slice(0, 1248021); // Adjust slice to limit data
+
+                // Treemap 1: App Categories with Minimum Installs
+                const categories = {};
+                limitedData.forEach(item => {
+                    const category = item['Category'] || 'Unknown';
+                    const appName = item['App Name'] || 'Unnamed App';
+                    const installs = Number(item['Minimum Installs']) || 1;
+
+                    if (!categories[category]) {
+                        categories[category] = { apps: [], totalInstalls: 0 };
+                    }
+                    categories[category].apps.push({ name: appName, installs });
+                    categories[category].totalInstalls += installs;
+                });
+
+                const categoryLabels = ["All Apps", ...Object.keys(categories)];
+                const categoryParents = ["", ...Object.keys(categories).map(() => "All Apps")];
+                const categoryValues = [null, ...Object.values(categories).map(cat => cat.totalInstalls)];
+
+                const categoryTrace = {
+                    type: 'treemap',
+                    labels: categoryLabels,
+                    parents: categoryParents,
+                    values: categoryValues,
+                    textinfo: 'label+value+percent parent',
+                    hoverinfo: 'label+value'
+                };
+
+                const categoryLayout = {
+                    title: 'App Category Treemap',
+                    height: 600,
+                    width: 800
+                };
+
+                Plotly.newPlot('treemap1', [categoryTrace], categoryLayout);
+
+                // Treemap 2: Content Rating with Minimum Installs
+                const contentratings = {};
+                limitedData.forEach(item => {
+                    const category = item['Content Rating'] || 'Unknown';
+                    const appName = item['App Name'] || 'Unnamed App';
+                    const installs = Number(item['Minimum Installs']) || 1;
+
+                    if (!contentratings[category]) {
+                        contentratings[category] = { apps: [], totalInstalls: 0 };
+                    }
+                    contentratings[category].apps.push({ name: appName, installs });
+                    contentratings[category].totalInstalls += installs;
+                });
+
+                const crLabels = ["All Apps", ...Object.keys(contentratings)];
+                const crParents = ["", ...Object.keys(contentratings).map(() => "All Apps")];
+                const crValues = [null, ...Object.values(contentratings).map(cat => cat.totalInstalls)];
+
+                const crTrace = {
+                    type: 'treemap',
+                    labels: crLabels,
+                    parents: crParents,
+                    values: crValues,
+                    textinfo: 'label+value+percent parent',
+                    hoverinfo: 'label+value'
+                };
+
+                const crLayout = {
+                    title: 'Content Rating Treemap',
+                    height: 600,
+                    width: 800
+                };
+
+                Plotly.newPlot('treemap2', [crTrace], crLayout);
+
+
+                // Additional Treemap 3: Ad Supported with Minimum Installs
+                const adSupportedData = {};
+                limitedData.forEach(item => {
+                    const adSupported = item['Ad Supported'] || false;
+                    const installs = Number(item['Minimum Installs']) || 1;
+
+                    if (!adSupportedData[adSupported]) {
+                        adSupportedData[adSupported] = { totalInstalls: 0 };
+                    }
+                    adSupportedData[adSupported].totalInstalls += installs;
+                });
+
+                const adLabels = ["All Apps", ...Object.keys(adSupportedData)];
+                const adParents = ["", ...Object.keys(adSupportedData).map(() => "All Apps")];
+                const adValues = [null, ...Object.values(adSupportedData).map(ad => ad.totalInstalls)];
+
+                const adTrace = {
+                    type: 'treemap',
+                    labels: adLabels,
+                    parents: adParents,
+                    values: adValues,
+                    textinfo: 'label+value+percent parent',
+                    hoverinfo: 'label+value'
+                };
+
+                Plotly.newPlot('treemap3', [adTrace], {
+                    title: 'Ad Supported Apps',
+                    height: 600,
+                    width: 800
+                });
+
+                // Additional Treemap 4: Price Categories
+                const freeData = {};
+                limitedData.forEach(item => {
+                    const adSupported = item['Free'] || false;
+                    const installs = Number(item['Minimum Installs']) || 1;
+
+                    if (!adSupportedData[adSupported]) {
+                        adSupportedData[adSupported] = { totalInstalls: 0 };
+                    }
+                    adSupportedData[adSupported].totalInstalls += installs;
+                });
+
+                const freeLabels = ["All Apps", ...Object.keys(adSupportedData)];
+                const freeParents = ["", ...Object.keys(adSupportedData).map(() => "All Apps")];
+                const freeValues = [null, ...Object.values(adSupportedData).map(ad => ad.totalInstalls)];
+
+                const freeTrace = {
+                    type: 'treemap',
+                    labels: freeLabels,
+                    parents: freeParents,
+                    values: freeValues,
+                    textinfo: 'label+value+percent parent',
+                    hoverinfo: 'label+value'
+                };
+
+                Plotly.newPlot('treemap4', [freeTrace], {
+                    title: 'Free vs Paid Apps',
+                    height: 600,
+                    width: 800
+                });
+
+                // Additional Treemap 5: In app purchases
+                const inappData = {};
+                limitedData.forEach(item => {
+                    const adSupported = item['In App Purchases'] || false;
+                    const installs = Number(item['Minimum Installs']) || 1;
+
+                    if (!adSupportedData[adSupported]) {
+                        adSupportedData[adSupported] = { totalInstalls: 0 };
+                    }
+                    adSupportedData[adSupported].totalInstalls += installs;
+                });
+
+                const inappLabels = ["All Apps", ...Object.keys(adSupportedData)];
+                const inappParents = ["", ...Object.keys(adSupportedData).map(() => "All Apps")];
+                const inappValues = [null, ...Object.values(adSupportedData).map(ad => ad.totalInstalls)];
+
+                const inappTrace = {
+                    type: 'treemap',
+                    labels: inappLabels,
+                    parents: inappParents,
+                    values: inappValues,
+                    textinfo: 'label+value+percent parent',
+                    hoverinfo: 'label+value'
+                };
+
+                Plotly.newPlot('treemap5', [inappTrace], {
+                    title: 'In app purchases available or not',
+                    height: 600,
+                    width: 800
+                });
+
+                // Additional Treemap 6: Content Rating
+                const contentratingData = {};
+                limitedData.forEach(item => {
+                    const adSupported = item['In App Purchases'] || false;
+                    const installs = Number(item['Minimum Installs']) || 1;
+
+                    if (!adSupportedData[adSupported]) {
+                        adSupportedData[adSupported] = { totalInstalls: 0 };
+                    }
+                    adSupportedData[adSupported].totalInstalls += installs;
+                });
+
+                const contentratingLabels = ["All Apps", ...Object.keys(adSupportedData)];
+                const contentratingParents = ["", ...Object.keys(adSupportedData).map(() => "All Apps")];
+                const contentratingValues = [null, ...Object.values(adSupportedData).map(ad => ad.totalInstalls)];
+
+                const contentratingTrace = {
+                    type: 'treemap',
+                    labels: contentratingLabels,
+                    parents: contentratingParents,
+                    values: contentratingValues,
+                    textinfo: 'label+value+percent parent',
+                    hoverinfo: 'label+value'
+                };
+
+                Plotly.newPlot('treemap6', [contentratingTrace], {
+                    title: 'Content Rating True or False',
+                    height: 600,
+                    width: 800
+                });
+
+            } catch (error) {
+                console.error('Error loading JSON data:', error);
+            }
+        }
+
+        loadTreemaps();
+    </script>
+</body>
+</html>

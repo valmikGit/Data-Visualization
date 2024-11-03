@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Treemap Visualizations</title>
@@ -20,6 +21,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="treemapRow1" class="treemap-row">
         <div id="treemap1" class="treemap-container"></div>
@@ -33,6 +35,10 @@
         <div id="treemap5" class="treemap-container"></div>
         <div id="treemap6" class="treemap-container"></div>
     </div>
+    <div id="treemapRow3" class="treemap-row">
+        <div id="treemap7" class="treemap-container"></div>
+        <div id="treemap8" class="treemap-container"></div>
+    </div>
 
     <script async>
         async function loadTreemaps() {
@@ -40,7 +46,7 @@
                 // Load JSON data and parse it
                 const response = await fetch('treemap_data.json');
                 const data = await response.json();
-                
+
                 const limitedData = data.slice(0, 1248021); // Adjust slice to limit data
 
                 // Treemap 1: App Categories with Minimum Installs
@@ -207,36 +213,118 @@
                     width: 800
                 });
 
-                // Additional Treemap 6: Content Rating
-                const contentratingData = {};
+                // Tree map 7: Category and Content Rating
+                const contentcategory = {};
                 limitedData.forEach(item => {
-                    const adSupported = item['In App Purchases'] || false;
+                    const category = item['Category'] || 'Unknown Category';
+                    const contentRating = item['Content Rating'] || 'Unknown Rating';
                     const installs = Number(item['Minimum Installs']) || 1;
 
-                    if (!adSupportedData[adSupported]) {
-                        adSupportedData[adSupported] = { totalInstalls: 0 };
+                    // Initialize category if it doesn't exist
+                    if (!contentcategory[category]) {
+                        contentcategory[category] = { ratings: {}, totalInstalls: 0 };
                     }
-                    adSupportedData[adSupported].totalInstalls += installs;
+
+                    // Initialize content rating under the category if it doesn't exist
+                    if (!contentcategory[category].ratings[contentRating]) {
+                        contentcategory[category].ratings[contentRating] = { totalInstalls: 0 };
+                    }
+
+                    // Increment installs for each content rating under the category
+                    contentcategory[category].ratings[contentRating].totalInstalls += installs;
+                    contentcategory[category].totalInstalls += installs;
                 });
 
-                const contentratingLabels = ["All Apps", ...Object.keys(adSupportedData)];
-                const contentratingParents = ["", ...Object.keys(adSupportedData).map(() => "All Apps")];
-                const contentratingValues = [null, ...Object.values(adSupportedData).map(ad => ad.totalInstalls)];
+                // Prepare data for Plotly treemap
+                const ccLabels = ["All Apps"];
+                const ccParents = [""];
+                const ccValues = [null];
 
-                const contentratingTrace = {
+                // Loop over categories and content ratings to populate labels, parents, and values
+                Object.keys(contentcategory).forEach(category => {
+                    ccLabels.push(category);
+                    ccParents.push("All Apps");
+                    ccValues.push(contentcategory[category].totalInstalls);
+
+                    Object.keys(contentcategory[category].ratings).forEach(contentRating => {
+                        ccLabels.push(contentRating);
+                        ccParents.push(category);
+                        ccValues.push(contentcategory[category].ratings[contentRating].totalInstalls);
+                    });
+                });
+
+                const ccTrace = {
                     type: 'treemap',
-                    labels: contentratingLabels,
-                    parents: contentratingParents,
-                    values: contentratingValues,
+                    labels: ccLabels,
+                    parents: ccParents,
+                    values: ccValues,
                     textinfo: 'label+value+percent parent',
                     hoverinfo: 'label+value'
                 };
 
-                Plotly.newPlot('treemap6', [contentratingTrace], {
-                    title: 'Content Rating True or False',
+                const ccLayout = {
+                    title: 'Category and Content Rating Treemap',
                     height: 600,
                     width: 800
+                };
+
+                Plotly.newPlot('treemap7', [ccTrace], ccLayout);
+
+                // Tree map 8: Category and In App Purchases
+                const categoryInApp = {};
+                limitedData.forEach(item => {
+                    const category = item['Category'] || 'Unknown Category';
+                    // console.log(item['In App Purchases'])
+
+                    // Check for any truthy value that is not explicitly "False" to set as "True"
+                    const inAppPurchases = item['In App Purchases'] && item['In App Purchases'].toString().toLowerCase() !== "false" ? 'True' : 'False';
+
+                    // Initialize category if it doesn't exist
+                    if (!categoryInApp[category]) {
+                        categoryInApp[category] = { purchases: { 'True': { appCount: 0 }, 'False': { appCount: 0 } }, totalApps: 0 };
+                    }
+
+                    // Increment the app count for each In App Purchases status under the category
+                    categoryInApp[category].purchases[inAppPurchases].appCount += 1;
+                    categoryInApp[category].totalApps += 1;
                 });
+
+                // Prepare data for Plotly treemap
+                const ciLabels = ["All Apps"];
+                const ciParents = [""];
+                const ciValues = [null];
+
+                // Loop over categories and In App Purchases to populate labels, parents, and values
+                Object.keys(categoryInApp).forEach(category => {
+                    ciLabels.push(category);
+                    ciParents.push("All Apps");
+                    ciValues.push(categoryInApp[category].totalApps);
+
+                    Object.keys(categoryInApp[category].purchases).forEach(inAppPurchases => {
+                        ciLabels.push(`${category} - ${inAppPurchases}`);
+                        ciParents.push(category);
+                        ciValues.push(categoryInApp[category].purchases[inAppPurchases].appCount);
+                    });
+                });
+
+                const ciTrace = {
+                    type: 'treemap',
+                    labels: ciLabels,
+                    parents: ciParents,
+                    values: ciValues,
+                    textinfo: 'label+value+percent parent',
+                    hoverinfo: 'label+value+percent parent'
+                };
+
+                const ciLayout = {
+                    title: 'Category and In App Purchases Treemap',
+                    height: 600,
+                    width: 800
+                };
+
+                Plotly.newPlot('treemap8', [ciTrace], ciLayout);
+
+
 
             } catch (error) {
                 console.error('Error loading JSON data:', error);
@@ -246,4 +334,5 @@
         loadTreemaps();
     </script>
 </body>
+
 </html>

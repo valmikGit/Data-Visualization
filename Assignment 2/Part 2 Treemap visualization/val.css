@@ -1,0 +1,78 @@
+body {
+  /* show some other background colour */
+  background-color: #2A3950;
+  color: #fff;
+}
+
+
+html,
+body,
+#map {
+    width: 95%;
+    height: 95%;
+    margin: 0;
+    padding: 0;
+    text-align: center;    
+}
+
+/* increase the checkbox size */
+input[type="checkbox"] {
+  transform: scale(1.5);
+}
+
+
+.button {
+    background-color: #f64668; 
+    /* color: #ff3a61;
+    color: #ff7b53; */
+    border: none;
+    color: white;
+    padding: 13px 28px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+  .button1 {
+    background-color: #984063;
+    color: white;
+    border: 2px solid #2c3e50;
+  }
+  
+  .button1:hover {
+    background-color: #f64668;
+    color: white;
+  }
+
+      /* file upload button */
+  input[type="file"]::file-selector-button {
+    padding: 13px 28px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    border-radius: 20px;
+    background-color: #984063;
+    color: white;
+    border: none;
+  }
+
+  /* file upload button hover state */
+
+  input[type="file"]::file-selector-button:hover {
+    background-color: #f64668;
+    color: white;
+  }
+
+  /* file upload button active state */
+  input[type="file"]::file-selector-button:active {
+    background-color: #e5e7eb;
+  }

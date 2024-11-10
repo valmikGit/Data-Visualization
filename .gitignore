@@ -6,7 +6,6 @@ dvenv
 *.egofeat
 *.feat
 *.featnames
-*.txt
 *.gz
 *.json
 CountorMapping.ipynb

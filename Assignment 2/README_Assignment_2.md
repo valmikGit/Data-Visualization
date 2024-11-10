@@ -8,7 +8,7 @@ In the first subsection, I researched about the natural indices which can be der
 ### Make a Python virtual environment:
 - Run this comand:
   ```bash
-  python -m dvenv
+  python -m venv dvenv
   ```
 - Then, run this command:
   ```bash
@@ -21,7 +21,7 @@ In the first subsection, I researched about the natural indices which can be der
 ### Tree map visualizations:
 - Navigate to the correct to the folder:
   ```bash
-  cd '.\Part 2 Treemap visualization\'
+  cd "Part 2 Treemap visualization"
   ```
 - Run the following command:
   ```bash
@@ -29,7 +29,14 @@ In the first subsection, I researched about the natural indices which can be der
   ```
 - Copy the HTTP URL output on the command the line and paste it on the browser. Replace '[::]' by 'localhost' in the URL and then press Enter. You will be able to see the folder structure on the webpage. Click on the playstore.html file. This will open the webpage. Now, you can use the webpage to generate tree maps by uploading .csv files.
 ### Colour map visulaizations:
-- Navigate to the folder '.\Part 1 sea surfaced data\'. Do not use the command line to navigate because a .ipynb needs to be run. Navigate manually using a file explorer to the folder mentioned.
-- Now you will find the file DV.ipynb. Select the virtual environment you made (dvenv), as the kernel for this .ipynb file.
-- Now run all the cells of this file.
-- To view the GIFs corresponding to the natural indices, navigate to the folder: "Part 1 sea surfaced data". Please use a file explorer to navigate to the folder. There are folders named with each natural index. In each folder, there is a GIF.
+- Make sure the dvenv virtual environment is still activated.
+- Navigate to the Part 1 folder:
+  ```bash
+  cd "Part 1 sea surfaced data"
+  ```
+- Now to run the DV.py file:
+  ```bash
+  python DV.py
+  ```
+- This should create new folders with names same as the natural indices used. In these folders you will find the colour maps for these natural indices corresponding to the dates chosen by us.
+- To view the GIFs, you can open the "Colour Map GIFs for Natural Indices" folder. In this folder, there are GIFs corresponding to each natural index using the colour maps made for the dates chosen by us.

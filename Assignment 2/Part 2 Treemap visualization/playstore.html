@@ -1,608 +1,427 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Treemap Visualizations</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js" async defer></script>
-    <style>
-        /* Flexbox container to display rows of treemaps */
-        .treemap-row {
-            display: flex;
-            width: 100%;
-            justify-content: space-around;
-            margin-bottom: 20px;
-        }
-
-        /* Style for each treemap container */
-        .treemap-container {
-            width: 48%;
-            height: 100vh;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Dynamic Loan Default Treemap</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <!-- AnyChart Library -->
+  <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-bundle.min.js"></script>
+  <!-- FusionCharts Library -->
+  <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/fusioncharts.js"></script>
+  <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/themes/fusioncharts.theme.fusion.js"></script>
+  <!-- CSS for styling -->
+  <link rel="stylesheet" type="text/css" href="val.css">
+  <style>
+    body {
+      background-color: #2A3950;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .controls {
+      margin-bottom: 20px;
+      background-color: #3A4A60;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .controls label {
+      display: block;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .controls select, .controls input[type="text"], .controls input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .controls .button {
+      background-color: #f64668;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      margin-top: 15px;
+      cursor: pointer;
+      border-radius: 20px;
+      font-size: 16px;
+    }
+    .controls .button:hover {
+      background-color: #ff7b53;
+    }
+    #map {
+      width: 90%;
+      height: 600px;
+    }
+  </style>
 </head>
-
 <body>
-    <div id="treemapRow1" class="treemap-row">
-        <div id="treemap1" class="treemap-container"></div>
-        <div id="treemap2" class="treemap-container"></div>
+  <div class="controls">
+    <label for="csvFileInput">Upload CSV:</label>
+    <input type="file" id="csvFileInput" accept=".csv" />
+
+    <label for="columnOrder">Select Columns for Hierarchy:</label>
+    <div id="columnSelectors">
+      <!-- Dynamic column selectors will be appended here -->
     </div>
-    <div id="treemapRow2" class="treemap-row">
-        <div id="treemap3" class="treemap-container"></div>
-        <div id="treemap4" class="treemap-container"></div>
-    </div>
-    <div id="treemapRow3" class="treemap-row">
-        <div id="treemap5" class="treemap-container"></div>
-        <div id="treemap6" class="treemap-container"></div>
-    </div>
-    <div id="treemapRow4" class="treemap-row">
-        <div id="treemap7" class="treemap-container"></div>
-        <div id="treemap8" class="treemap-container"></div>
-    </div>
-    <div id="treemapRow5" class="treemap-row">
-        <div id="treemap9" class="treemap-container"></div>
-        <div id="treemap10" class="treemap-container"></div>
-    </div>
-    <div id="treemapRow5" class="treemap-row">
-        <div id="treemap11" class="treemap-container"></div>
-        <div id="treemap12" class="treemap-container"></div>
-    </div>
-
-    <script async>
-        async function loadTreemaps() {
-            try {
-                // Load JSON data and parse it
-                const response = await fetch('treemap_data.json');
-                const data = await response.json();
-
-                const limitedData = data.slice(0, 1248021); // Adjust slice to limit data
-
-                // Treemap 1: App Categories with Minimum Installs
-                const categories = {};
-                limitedData.forEach(item => {
-                    const category = item['Category'] || 'Unknown';
-                    const appName = item['App Name'] || 'Unnamed App';
-                    const installs = Number(item['Minimum Installs']) || 1;
-
-                    if (!categories[category]) {
-                        categories[category] = { apps: [], totalInstalls: 0 };
-                    }
-                    categories[category].apps.push({ name: appName, installs });
-                    categories[category].totalInstalls += installs;
-                });
-
-                const categoryLabels = ["All Apps", ...Object.keys(categories)];
-                const categoryParents = ["", ...Object.keys(categories).map(() => "All Apps")];
-                const categoryValues = [null, ...Object.values(categories).map(cat => cat.totalInstalls)];
-
-                const categoryTrace = {
-                    type: 'treemap',
-                    labels: categoryLabels,
-                    parents: categoryParents,
-                    values: categoryValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value'
-                };
-
-                const categoryLayout = {
-                    title: 'App Category Treemap',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap1', [categoryTrace], categoryLayout);
-
-                // Treemap 2: Content Rating with Minimum Installs
-                const contentratings = {};
-                limitedData.forEach(item => {
-                    const category = item['Content Rating'] || 'Unknown';
-                    const appName = item['App Name'] || 'Unnamed App';
-                    const installs = Number(item['Minimum Installs']) || 1;
-
-                    if (!contentratings[category]) {
-                        contentratings[category] = { apps: [], totalInstalls: 0 };
-                    }
-                    contentratings[category].apps.push({ name: appName, installs });
-                    contentratings[category].totalInstalls += installs;
-                });
-
-                const crLabels = ["All Apps", ...Object.keys(contentratings)];
-                const crParents = ["", ...Object.keys(contentratings).map(() => "All Apps")];
-                const crValues = [null, ...Object.values(contentratings).map(cat => cat.totalInstalls)];
-
-                const crTrace = {
-                    type: 'treemap',
-                    labels: crLabels,
-                    parents: crParents,
-                    values: crValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value'
-                };
-
-                const crLayout = {
-                    title: 'Content Rating Treemap',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap2', [crTrace], crLayout);
-
-
-                // Additional Treemap 3: Ad Supported with Minimum Installs
-                const adSupportedData = {};
-                limitedData.forEach(item => {
-                    const adSupported = item['Ad Supported'] || false;
-                    const installs = Number(item['Minimum Installs']) || 1;
-
-                    if (!adSupportedData[adSupported]) {
-                        adSupportedData[adSupported] = { totalInstalls: 0 };
-                    }
-                    adSupportedData[adSupported].totalInstalls += installs;
-                });
-
-                const adLabels = ["All Apps", ...Object.keys(adSupportedData)];
-                const adParents = ["", ...Object.keys(adSupportedData).map(() => "All Apps")];
-                const adValues = [null, ...Object.values(adSupportedData).map(ad => ad.totalInstalls)];
-
-                const adTrace = {
-                    type: 'treemap',
-                    labels: adLabels,
-                    parents: adParents,
-                    values: adValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value'
-                };
-
-                Plotly.newPlot('treemap3', [adTrace], {
-                    title: 'Ad Supported Apps',
-                    height: 600,
-                    width: 800
-                });
-
-                // Additional Treemap 4: Price Categories
-                const freeData = {};
-                limitedData.forEach(item => {
-                    const adSupported = item['Free'] || false;
-                    const installs = Number(item['Minimum Installs']) || 1;
-
-                    if (!adSupportedData[adSupported]) {
-                        adSupportedData[adSupported] = { totalInstalls: 0 };
-                    }
-                    adSupportedData[adSupported].totalInstalls += installs;
-                });
-
-                const freeLabels = ["All Apps", ...Object.keys(adSupportedData)];
-                const freeParents = ["", ...Object.keys(adSupportedData).map(() => "All Apps")];
-                const freeValues = [null, ...Object.values(adSupportedData).map(ad => ad.totalInstalls)];
-
-                const freeTrace = {
-                    type: 'treemap',
-                    labels: freeLabels,
-                    parents: freeParents,
-                    values: freeValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value'
-                };
-
-                Plotly.newPlot('treemap4', [freeTrace], {
-                    title: 'Free vs Paid Apps',
-                    height: 600,
-                    width: 800
-                });
-
-                // Additional Treemap 5: In app purchases
-                const inappData = {};
-                limitedData.forEach(item => {
-                    const adSupported = item['In App Purchases'] || false;
-                    const installs = Number(item['Minimum Installs']) || 1;
-
-                    if (!adSupportedData[adSupported]) {
-                        adSupportedData[adSupported] = { totalInstalls: 0 };
-                    }
-                    adSupportedData[adSupported].totalInstalls += installs;
-                });
-
-                const inappLabels = ["All Apps", ...Object.keys(adSupportedData)];
-                const inappParents = ["", ...Object.keys(adSupportedData).map(() => "All Apps")];
-                const inappValues = [null, ...Object.values(adSupportedData).map(ad => ad.totalInstalls)];
-
-                const inappTrace = {
-                    type: 'treemap',
-                    labels: inappLabels,
-                    parents: inappParents,
-                    values: inappValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value'
-                };
-
-                Plotly.newPlot('treemap5', [inappTrace], {
-                    title: 'In app purchases available or not',
-                    height: 600,
-                    width: 800
-                });
-
-                // Tree map 6: Category and Free
-                const categoryfree = {};
-                limitedData.forEach(item => {
-                    const category = item['Category'] || 'Unknown Category';
-
-                    // Check for any truthy value that is not explicitly "False" to set as "True"
-                    const inAppPurchases = item['Free'] && item['Free'].toString().toLowerCase() !== "false" ? 'True' : 'False';
-
-                    // Initialize category if it doesn't exist
-                    if (!categoryfree[category]) {
-                        categoryfree[category] = { purchases: { 'True': { appCount: 0 }, 'False': { appCount: 0 } }, totalApps: 0 };
-                    }
-
-                    // Increment the app count for each In App Purchases status under the category
-                    categoryfree[category].purchases[inAppPurchases].appCount += 1;
-                    categoryfree[category].totalApps += 1;
-                });
-
-                // Prepare data for Plotly treemap
-                const cfLabels = ["All Apps"];
-                const cfParents = [""];
-                const cfValues = [null];
-
-                // Loop over categories and In App Purchases to populate labels, parents, and values
-                Object.keys(categoryfree).forEach(category => {
-                    cfLabels.push(category);
-                    cfParents.push("All Apps");
-                    cfValues.push(categoryfree[category].totalApps);
-
-                    Object.keys(categoryfree[category].purchases).forEach(inAppPurchases => {
-                        cfLabels.push(`${category} - ${inAppPurchases}`);
-                        cfParents.push(category);
-                        cfValues.push(categoryfree[category].purchases[inAppPurchases].appCount);
-                    });
-                });
-
-                const cfTrace = {
-                    type: 'treemap',
-                    labels: cfLabels,
-                    parents: cfParents,
-                    values: cfValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value+percent parent'
-                };
-
-                const cfLayout = {
-                    title: 'Category and Free Treemap',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap6', [cfTrace], cfLayout);
-
-                // Tree map 7: Category and Content Rating
-                const contentcategory = {};
-                limitedData.forEach(item => {
-                    const category = item['Category'] || 'Unknown Category';
-                    const contentRating = item['Content Rating'] || 'Unknown Rating';
-                    const installs = Number(item['Minimum Installs']) || 1;
-
-                    // Initialize category if it doesn't exist
-                    if (!contentcategory[category]) {
-                        contentcategory[category] = { ratings: {}, totalInstalls: 0 };
-                    }
-
-                    // Initialize content rating under the category if it doesn't exist
-                    if (!contentcategory[category].ratings[contentRating]) {
-                        contentcategory[category].ratings[contentRating] = { totalInstalls: 0 };
-                    }
-
-                    // Increment installs for each content rating under the category
-                    contentcategory[category].ratings[contentRating].totalInstalls += installs;
-                    contentcategory[category].totalInstalls += installs;
-                });
-
-                // Prepare data for Plotly treemap
-                const ccLabels = ["All Apps"];
-                const ccParents = [""];
-                const ccValues = [null];
-
-                // Loop over categories and content ratings to populate labels, parents, and values
-                Object.keys(contentcategory).forEach(category => {
-                    ccLabels.push(category);
-                    ccParents.push("All Apps");
-                    ccValues.push(contentcategory[category].totalInstalls);
-
-                    Object.keys(contentcategory[category].ratings).forEach(contentRating => {
-                        ccLabels.push(contentRating);
-                        ccParents.push(category);
-                        ccValues.push(contentcategory[category].ratings[contentRating].totalInstalls);
-                    });
-                });
-
-                const ccTrace = {
-                    type: 'treemap',
-                    labels: ccLabels,
-                    parents: ccParents,
-                    values: ccValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value'
-                };
-
-                const ccLayout = {
-                    title: 'Category and Content Rating Treemap',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap7', [ccTrace], ccLayout);
-
-                // Tree map 8: Category and In App Purchases
-                const categoryInApp = {};
-                limitedData.forEach(item => {
-                    const category = item['Category'] || 'Unknown Category';
-
-                    // Check for any truthy value that is not explicitly "False" to set as "True"
-                    const inAppPurchases = item['In App Purchases'] && item['In App Purchases'].toString().toLowerCase() !== "false" ? 'True' : 'False';
-
-                    // Initialize category if it doesn't exist
-                    if (!categoryInApp[category]) {
-                        categoryInApp[category] = { purchases: { 'True': { appCount: 0 }, 'False': { appCount: 0 } }, totalApps: 0 };
-                    }
-
-                    // Increment the app count for each In App Purchases status under the category
-                    categoryInApp[category].purchases[inAppPurchases].appCount += 1;
-                    categoryInApp[category].totalApps += 1;
-                });
-
-                // Prepare data for Plotly treemap
-                const ciLabels = ["All Apps"];
-                const ciParents = [""];
-                const ciValues = [null];
-
-                // Loop over categories and In App Purchases to populate labels, parents, and values
-                Object.keys(categoryInApp).forEach(category => {
-                    ciLabels.push(category);
-                    ciParents.push("All Apps");
-                    ciValues.push(categoryInApp[category].totalApps);
-
-                    Object.keys(categoryInApp[category].purchases).forEach(inAppPurchases => {
-                        ciLabels.push(`${category} - ${inAppPurchases}`);
-                        ciParents.push(category);
-                        ciValues.push(categoryInApp[category].purchases[inAppPurchases].appCount);
-                    });
-                });
-
-                const ciTrace = {
-                    type: 'treemap',
-                    labels: ciLabels,
-                    parents: ciParents,
-                    values: ciValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value+percent parent'
-                };
-
-                const ciLayout = {
-                    title: 'Category and In App Purchases Treemap',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap8', [ciTrace], ciLayout);
-
-                // Tree map 9: Category and Ad Supported
-                const categoryAd = {};
-                limitedData.forEach(item => {
-                    const category = item['Category'] || 'Unknown Category';
-
-                    // Check for any truthy value that is not explicitly "False" to set as "True"
-                    const inAppPurchases = item['Ad Supported'] && item['Ad Supported'].toString().toLowerCase() !== "false" ? 'True' : 'False';
-
-                    // Initialize category if it doesn't exist
-                    if (!categoryAd[category]) {
-                        categoryAd[category] = { purchases: { 'True': { appCount: 0 }, 'False': { appCount: 0 } }, totalApps: 0 };
-                    }
-
-                    // Increment the app count for each In App Purchases status under the category
-                    categoryAd[category].purchases[inAppPurchases].appCount += 1;
-                    categoryAd[category].totalApps += 1;
-                });
-
-                // Prepare data for Plotly treemap
-                const caLabels = ["All Apps"];
-                const caParents = [""];
-                const caValues = [null];
-
-                // Loop over categories and In App Purchases to populate labels, parents, and values
-                Object.keys(categoryAd).forEach(category => {
-                    caLabels.push(category);
-                    caParents.push("All Apps");
-                    caValues.push(categoryInApp[category].totalApps);
-
-                    Object.keys(categoryAd[category].purchases).forEach(inAppPurchases => {
-                        caLabels.push(`${category} - ${inAppPurchases}`);
-                        caParents.push(category);
-                        caValues.push(categoryInApp[category].purchases[inAppPurchases].appCount);
-                    });
-                });
-
-                const caTrace = {
-                    type: 'treemap',
-                    labels: caLabels,
-                    parents: caParents,
-                    values: caValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value+percent parent'
-                };
-
-                const caLayout = {
-                    title: 'Category and Ad Supported Treemap',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap9', [caTrace], caLayout);
-
-                // Tree map 10: Content Rating and Ad Supported
-                const contentAd = {};
-                limitedData.forEach(item => {
-                    const category = item['Content Rating'] || 'Unknown Rating';
-
-                    // Check for any truthy value that is not explicitly "False" to set as "True"
-                    const inAppPurchases = item['Ad Supported'] && item['Ad Supported'].toString().toLowerCase() !== "false" ? 'True' : 'False';
-
-                    // Initialize category if it doesn't exist
-                    if (!contentAd[category]) {
-                        contentAd[category] = { purchases: { 'True': { appCount: 0 }, 'False': { appCount: 0 } }, totalApps: 0 };
-                    }
-
-                    // Increment the app count for each In App Purchases status under the category
-                    contentAd[category].purchases[inAppPurchases].appCount += 1;
-                    contentAd[category].totalApps += 1;
-                });
-
-                // Prepare data for Plotly treemap
-                const coaLabels = ["All Apps"];
-                const coaParents = [""];
-                const coaValues = [null];
-
-                // Loop over categories and In App Purchases to populate labels, parents, and values
-                Object.keys(contentAd).forEach(category => {
-                    coaLabels.push(category);
-                    coaParents.push("All Apps");
-                    coaValues.push(contentAd[category].totalApps);
-
-                    Object.keys(contentAd[category].purchases).forEach(inAppPurchases => {
-                        coaLabels.push(`${category} - ${inAppPurchases}`);
-                        coaParents.push(category);
-                        coaValues.push(contentAd[category].purchases[inAppPurchases].appCount);
-                    });
-                });
-
-                const coaTrace = {
-                    type: 'treemap',
-                    labels: coaLabels,
-                    parents: coaParents,
-                    values: coaValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value+percent parent'
-                };
-
-                const coaLayout = {
-                    title: 'Content Rating and Ad Supported Treemap',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap10', [coaTrace], coaLayout);
-
-                // Tree map 11: Content Rating and In App Purchases
-                const contentInApp = {};
-                limitedData.forEach(item => {
-                    const category = item['Content Rating'] || 'Unknown Rating';
-
-                    // Check for any truthy value that is not explicitly "False" to set as "True"
-                    const inAppPurchases = item['In App Purchases'] && item['In App Purchases'].toString().toLowerCase() !== "false" ? 'True' : 'False';
-
-                    // Initialize category if it doesn't exist
-                    if (!contentInApp[category]) {
-                        contentInApp[category] = { purchases: { 'True': { appCount: 0 }, 'False': { appCount: 0 } }, totalApps: 0 };
-                    }
-
-                    // Increment the app count for each In App Purchases status under the category
-                    contentInApp[category].purchases[inAppPurchases].appCount += 1;
-                    contentInApp[category].totalApps += 1;
-                });
-
-                // Prepare data for Plotly treemap
-                const coiLabels = ["All Apps"];
-                const coiParents = [""];
-                const coiValues = [null];
-
-                // Loop over categories and In App Purchases to populate labels, parents, and values
-                Object.keys(contentAd).forEach(category => {
-                    coiLabels.push(category);
-                    coiParents.push("All Apps");
-                    coiValues.push(contentInApp[category].totalApps);
-
-                    Object.keys(contentAd[category].purchases).forEach(inAppPurchases => {
-                        coiLabels.push(`${category} - ${inAppPurchases}`);
-                        coiParents.push(category);
-                        coiValues.push(contentInApp[category].purchases[inAppPurchases].appCount);
-                    });
-                });
-
-                const coiTrace = {
-                    type: 'treemap',
-                    labels: coiLabels,
-                    parents: coiParents,
-                    values: coiValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value+percent parent'
-                };
-
-                const coiLayout = {
-                    title: 'Content Rating and In App Purchases',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap11', [coiTrace], coiLayout);
-
-                // Tree map 12: Content Rating and Free
-                const contentFree = {};
-                limitedData.forEach(item => {
-                    const category = item['Content Rating'] || 'Unknown Rating';
-
-                    // Check for any truthy value that is not explicitly "False" to set as "True"
-                    const inAppPurchases = item['Free'] && item['Free'].toString().toLowerCase() !== "false" ? 'True' : 'False';
-
-                    // Initialize category if it doesn't exist
-                    if (!contentFree[category]) {
-                        contentFree[category] = { purchases: { 'True': { appCount: 0 }, 'False': { appCount: 0 } }, totalApps: 0 };
-                    }
-
-                    // Increment the app count for each In App Purchases status under the category
-                    contentFree[category].purchases[inAppPurchases].appCount += 1;
-                    contentFree[category].totalApps += 1;
-                });
-
-                // Prepare data for Plotly treemap
-                const cofLabels = ["All Apps"];
-                const cofParents = [""];
-                const cofValues = [null];
-
-                // Loop over categories and In App Purchases to populate labels, parents, and values
-                Object.keys(contentFree).forEach(category => {
-                    cofLabels.push(category);
-                    cofParents.push("All Apps");
-                    cofValues.push(contentFree[category].totalApps);
-
-                    Object.keys(contentFree[category].purchases).forEach(inAppPurchases => {
-                        cofLabels.push(`${category} - ${inAppPurchases}`);
-                        cofParents.push(category);
-                        cofValues.push(contentFree[category].purchases[inAppPurchases].appCount);
-                    });
-                });
-
-                const cofTrace = {
-                    type: 'treemap',
-                    labels: cofLabels,
-                    parents: cofParents,
-                    values: cofValues,
-                    textinfo: 'label+value+percent parent',
-                    hoverinfo: 'label+value+percent parent'
-                };
-
-                const cofLayout = {
-                    title: 'Content Rating and Free',
-                    height: 600,
-                    width: 800
-                };
-
-                Plotly.newPlot('treemap12', [cofTrace], cofLayout);
-
-            } catch (error) {
-                console.error('Error loading JSON data:', error);
-            }
+    <button class="button" id="addColumn">Add Column</button>
+
+    <label for="chartLibrary">Select Chart Library:</label>
+    <select id="chartLibrary">
+      <option value="fusion">FusionCharts</option>
+      <option value="anychart">AnyChart</option>
+    </select>
+
+    <label for="layoutType" id="layoutTypeLabel">Tree Map Layout:</label>
+    <select id="layoutType">
+      <option value="squarified">Squarified</option>
+      <option value="sliceVertical">Slice and Dice (Vertical)</option>
+      <option value="sliceHorizontal">Slice and Dice (Horizontal)</option>
+      <option value="sliceAlternate">Slice and Dice (Alternate)</option>
+    </select>
+
+    <button class="button" id="generateButton">Generate Treemap</button>
+    <button class="button" id="clearButton">Clear</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    let dataset = [];
+    let columnsList = [];
+    let hierarchyColumns = [];
+    let defaultRateData = {};
+
+    // Handle file upload
+    document.getElementById("csvFileInput").addEventListener("change", async function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const text = await file.text();
+        dataset = d3.csvParse(text);
+        columnsList = dataset.columns.filter(col => col !== 'health_new');
+        populateColumnSelectors();
+        alert("CSV loaded successfully. You can now select hierarchy columns and generate the treemap.");
+      }
+    });
+
+    // Show or hide the layoutType dropdown based on chart library selection
+    document.getElementById("chartLibrary").addEventListener("change", function () {
+      const layoutTypeLabel = document.getElementById("layoutTypeLabel");
+      const layoutType = document.getElementById("layoutType");
+      if (this.value === "fusion") {
+        layoutTypeLabel.style.display = "block";
+        layoutType.style.display = "block";
+      } else {
+        layoutTypeLabel.style.display = "none";
+        layoutType.style.display = "none";
+      }
+    });
+
+    // Populate column selectors
+    function populateColumnSelectors() {
+      const columnSelectorsDiv = document.getElementById("columnSelectors");
+      columnSelectorsDiv.innerHTML = ''; // Clear existing selectors
+
+      // Initialize with one selector (you can add more if needed)
+      addColumnSelector();
+    }
+
+    // Add a column selector
+    document.getElementById("addColumn").addEventListener("click", function() {
+      addColumnSelector();
+    });
+
+    function addColumnSelector() {
+      const columnSelectorsDiv = document.getElementById("columnSelectors");
+      const select = document.createElement("select");
+      select.classList.add("hierarchySelect");
+
+      // Add options to the select element
+      select.innerHTML = '<option value="">--Select Column--</option>';
+      columnsList.forEach(col => {
+        select.innerHTML += `<option value="${col}">${col}</option>`;
+      });
+
+      columnSelectorsDiv.appendChild(select);
+    }
+
+    // Clear button functionality
+    document.getElementById("clearButton").addEventListener("click", function() {
+      document.getElementById("map").innerHTML = "";
+      document.getElementById("columnSelectors").innerHTML = '';
+      document.getElementById("layoutType").selectedIndex = 0;
+      document.getElementById("chartLibrary").selectedIndex = 0;
+      hierarchyColumns = [];
+      alert("Cleared all selections.");
+    });
+
+    // Generate Treemap
+    document.getElementById("generateButton").addEventListener("click", function() {
+      // Get selected hierarchy columns
+      const selects = document.querySelectorAll(".hierarchySelect");
+      hierarchyColumns = Array.from(selects).map(select => select.value).filter(val => val !== "");
+      
+      if (hierarchyColumns.length === 0) {
+        alert("Please select at least one column for hierarchy.");
+        return;
+      }
+
+      // Get layout type
+      const layoutType = document.getElementById("layoutType").value;
+
+      // Get chart library
+      const chartLibrary = document.getElementById("chartLibrary").value;
+
+      // Process data
+      const hierarchicalData = buildHierarchy(dataset, hierarchyColumns);
+
+      // Render treemap
+      if (chartLibrary === "fusion") {
+        const hierarchicalData = buildFusionHierarchy(dataset, hierarchyColumns);
+        console.log(hierarchicalData);
+        let algorithm = "squarified";
+        let orientAlgorithm = "vertical";
+
+        if (layoutType === "squarified") {
+            algorithm = "squarified";
+        } else if (layoutType === "sliceHorizontal") {
+            algorithm = "sliceanddice";
+            orientAlgorithm = "horizontal";
+        } else if (layoutType === "sliceVertical") {
+            algorithm = "sliceanddice";
+            orientAlgorithm = "vertical";
+        } else if (layoutType === "sliceAlternate") {
+            algorithm = "sliceanddice";
+            orientAlgorithm = "alternate";
+        }
+        loadFusionTreemap(hierarchicalData, algorithm, orientAlgorithm);
+      } else if (chartLibrary === "anychart") {
+        loadAnyChartTreemap(hierarchicalData);
+      }
+    });
+
+    // Function to build hierarchical data with default rates
+    function buildHierarchy(data, columns) {
+      const root = [{ name: "Root", children: [] }];
+
+      data.forEach(row => {
+        let currentNode = root[0];
+        columns.forEach(col => {
+          let child = currentNode.children.find(c => c.name === row[col]);
+          if (!child) {
+            child = { name: row[col], children: [] };
+            currentNode.children.push(child);
+          }
+          currentNode = child;
+        });
+        // At the leaf node, accumulate default counts
+        if (!currentNode.defaulters) {
+          currentNode.defaulters = 0;
+          currentNode.total = 0;
+        }
+        
+        // Ensure proper checking for Free and Editors Choice (True/False values)
+        if ((row['Free'] === 'True' || row['Free'] === true || row['Free'] === 1)) {
+          currentNode.defaulters += 1;
         }
 
-        loadTreemaps();
-    </script>
-</body>
+        if ((row['Editors Choice'] === 'True' || row['Editors Choice'] === true || row['Editors Choice'] === 1)) {
+          currentNode.defaulters += 1;
+        }
+        
+        currentNode.total += 1;
+      });
 
+      // Function to calculate default rates recursively
+      function calculateRates(node) {
+        if (node.children && node.children.length > 0) {
+          node.children.forEach(child => calculateRates(child));
+          // Aggregate defaulters and total from children
+          node.defaulters = node.children.reduce((sum, child) => sum + (child.defaulters || 0), 0);
+          node.total = node.children.reduce((sum, child) => sum + (child.total || 0), 0);
+        }
+        if(node.children.length==0){
+            node.size = node.defaulters;
+        }
+        node.default_rate = node.total > 0 ? node.defaulters / node.total : 0;
+        node.default_rate = node.default_rate * 100;
+        node.default_rate = parseFloat(node.default_rate.toFixed(2));
+        if (node.children.length == 0) {
+            node.value = node.default_rate;
+        }
+      }
+
+      calculateRates(root[0]);
+      return root;
+    }
+
+    function buildFusionHierarchy(dataset, columns) {
+      const root = [{ "label": "Root", "data": [], "fillcolor": "#999999", "showLabel": "1", "fontColor": "#000000" }];
+      dataset.forEach(row => {
+        let currentNode = root[0];
+        columns.forEach(col => {
+          let child = currentNode.data.find(c => c.label === row[col]);
+          if (!child) {
+            child = { label: row[col], data: [] };
+            currentNode.data.push(child);
+          }
+          currentNode = child;
+        });
+        // At the leaf node, accumulate default counts
+        if (!currentNode.defaulters) {
+          currentNode.defaulters = 0;
+          currentNode.total = 0;
+        }
+        
+        // Ensure proper checking for Free and Editors Choice (True/False values)
+        if ((row['Free'] === 'True' || row['Free'] === true || row['Free'] === 1)) {
+          currentNode.defaulters += 1;
+        }
+
+        if ((row['Editors Choice'] === 'True' || row['Editors Choice'] === true || row['Editors Choice'] === 1)) {
+          currentNode.defaulters += 1;
+        }
+        
+        currentNode.total += 1;
+      });
+
+      // Function to calculate default rates recursively
+      function calculateRates(node) {
+        if (node.data && node.data.length > 0) {
+          node.data.forEach(child => calculateRates(child));
+          // Aggregate defaulters and total from children
+          node.defaulters = node.data.reduce((sum, child) => sum + (child.defaulters || 0), 0);
+          node.total = node.data.reduce((sum, child) => sum + (child.total || 0), 0);
+        }
+        node.value = node.defaulters; // value -> size
+        node.default_rate = node.total > 0 ? node.defaulters / node.total : 0;
+        node.default_rate = node.default_rate * 100;
+        node.default_rate = parseFloat(node.default_rate.toFixed(2));
+
+        node.svalue = node.default_rate; // for color scale
+      }
+
+      calculateRates(root[0]);
+      return root;
+    }
+
+    function loadAnyChartTreemap(hierarchicalData) {
+        console.log("Any Chart", hierarchicalData);
+        // Convert the data to AnyChart's tree structure
+        var treeData = anychart.data.tree(hierarchicalData, "as-tree");
+        var chart = anychart.treeMap(treeData);
+        // Chart customization
+        chart.hintDepth(1);
+        chart.maxDepth(2);
+        chart.hintOpacity(0.7);
+
+        chart.hovered().fill("silver", 0.2);
+        chart.selected().fill("silver", 0.6);
+        chart.selected().hatchFill("backward-diagonal", "silver", 2, 20);
+        chart.normal().stroke("silver");
+        chart.hovered().stroke("black", 2);
+        chart.selected().stroke("black", 2);
+
+        var customColorScale = anychart.scales.linearColor();
+        chart.background().fill("#2A3950");
+
+        // Color scale for better visualization on dark background
+        let scale = [
+            "#692A99",
+            "#980463",
+            "#f64668",
+            "#ff7b53"
+        ];
+        customColorScale.colors(scale.reverse());
+        chart.colorScale(customColorScale);
+
+        // Customize labels and tooltips
+        chart.labels().fontColor("#f5f5f5");
+        chart.colorRange().enabled(true);
+        chart.colorRange().length("90%");
+        chart.title().useHtml(true);
+        chart.title("<span style='font-size:18; font-style:bold'>Treemap Visualization</span><br><i><span style='font-size:14;'>Loan Default Analysis</span></i>");
+        chart.tooltip().useHtml(true);
+        chart.tooltip().format("Default Rate: {%default_rate}% <br><i>Number of Defaulters: {%total}</i>");
+        chart.labels().useHtml(true);
+        chart.labels().format("<span style='font-weight:bold'>{%name}</span><br>Default Rate: {%default_rate}%");
+
+        // Render the chart
+        chart.container("map");
+        chart.draw();
+    }
+
+    function loadFusionTreemap(dataPassed, algorithm, orientAlgorithm) {
+        console.log("hi");
+        console.log(algorithm, orientAlgorithm, dataPassed);
+
+        const chartConfig = {
+            type: 'treemap',
+            renderAt: 'map',
+            width: '100%',
+            height: '100%',
+            dataFormat: 'json',
+            dataSource: {
+                "chart": {
+                    "plotfillalpha": "80",
+                    "bgColor": "2A3950",
+                    "parentLabelLineHeight": "20",
+                    "hideTitle": "1",
+                    "labelFontColor": "000000",
+                    "labelFontSize": "15",
+                    "labelGlow": "0",
+                    "labelFont": "Arial",
+                    "showChildLabels": "1",
+                    "showParent": "1",
+                    "showLegend": "1",
+                    "plotTooltext": "<b>$label</b><br>Default Rate: <b>$svalue %</b><br>Number of Defaulters: <b>$value</b>",
+                    "hoverfillcolor": "CCCCCC",
+                    "hoverfillalpha": "50",
+                    "algorithm": algorithm,
+                    "slicingmode": orientAlgorithm,
+                    "caption": "Loan Default Analysis",
+                    "subcaption": "Treemap showing hierarchical default data",
+                    "subcaptionFontBold": "0",
+                    "subcaptionGlow": "0",
+                    "subcaptionFontSize": "14",
+                    "subcaptionFontColor": "FFFFFF",
+                    "captionFontColor": "FFFFFF",
+                    "captionFontSize": "20",
+                    "captionGlow": "0",
+                    "theme": "fusion",
+                },
+                "data": dataPassed,
+                "colorrange": {
+                    "mapbypercent": "0",
+                    "gradient": "1",
+                    "minvalue": "0",
+                    "code": "F1c18E",
+                    "color": [
+                        {
+                            "code": "F98477",
+                            "maxvalue": "25",
+                        },
+                        {
+                            "code": "EA4F88",
+                            "maxvalue": "50",
+                        },
+                        {
+                            "code": "B1339E",
+                            "maxvalue": "75",
+                        },
+                        {
+                            "code": "692A99",
+                            "maxvalue": "100",
+                        }
+                    ]
+                }
+            }
+        };
+
+        var fusioncharts = new FusionCharts(chartConfig);
+        fusioncharts.render();
+    }
+  </script>
+</body>
 </html>

@@ -28,7 +28,7 @@ In the first subsection, I researched about the natural indices which can be der
   ```bash
   python -m http.server
   ```
-- Copy the HTTP URL output on the command the line and paste it on the browser. Replace '[::]' by 'localhost' in the URL and then press Enter. You will be able to see the folder structure on the webpage. Click on the playstore.html file. This will open the webpage. Now, you can use the webpage to generate tree maps by uploading .csv files.
+- Copy the HTTP URL output on the command the line and paste it on the browser. Replace '[::]' by 'localhost' in the URL and then press Enter. You will be able to see the folder structure on the webpage. Click on the playstore.html file. This will open the webpage. Now, you can use the webpage to generate tree maps by uploading "treemap_data.csv" file, which is present in the "Part 2 Treemap visualization" folder.
 ### Colour map visulaizations:
 - Make sure the dvenv virtual environment is still activated.
 - Make sure you are at the root of this directory.

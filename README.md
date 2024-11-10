@@ -139,3 +139,4 @@ In the first subsection, I researched about the natural indices which can be der
 - Navigate to the folder '.\Assignment 2\Part 1 sea surfaced data\'. Do not use the command line to navigate because a .ipynb needs to be run. Navigate manually using a file explorer to the folder mentioned.
 - Now you will find the file DV.ipynb. Select the virtual environment you made (dvenv), as the kernel for this .ipynb file.
 - Now run all the cells of this file.
+- To view the GIFs corresponding to the natural indices, navigate to the folder: "Assignment 2\Part 1 sea surfaced data". Please use a file explorer to navigate to the folder. There are folders named with each natural index. In each folder, there is a GIF.

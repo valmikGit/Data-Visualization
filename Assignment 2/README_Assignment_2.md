@@ -39,4 +39,4 @@ In the first subsection, I researched about the natural indices which can be der
   python DV.py
   ```
 - This should create new folders with names same as the natural indices used. In these folders you will find the colour maps for these natural indices corresponding to the dates chosen by us.
-- To view the GIFs, you can open the "Colour Map GIFs for Natural Indices" folder. In this folder, there are GIFs corresponding to each natural index using the colour maps made for the dates chosen by us.
+- To view the GIFs, you can open the "Part 1 sea surfaced date/Colour Map GIFs for Natural Indices" folder. In this folder, there are GIFs corresponding to each natural index using the colour maps made for the dates chosen by us.

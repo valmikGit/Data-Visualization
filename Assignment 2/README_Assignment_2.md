@@ -19,6 +19,7 @@ In the first subsection, I researched about the natural indices which can be der
   pip install -r requirements.txt
   ```
 ### Tree map visualizations:
+- Make sure you are at the root of this directory.
 - Navigate to the correct to the folder:
   ```bash
   cd "Part 2 Treemap visualization"
@@ -30,6 +31,7 @@ In the first subsection, I researched about the natural indices which can be der
 - Copy the HTTP URL output on the command the line and paste it on the browser. Replace '[::]' by 'localhost' in the URL and then press Enter. You will be able to see the folder structure on the webpage. Click on the playstore.html file. This will open the webpage. Now, you can use the webpage to generate tree maps by uploading .csv files.
 ### Colour map visulaizations:
 - Make sure the dvenv virtual environment is still activated.
+- Make sure you are at the root of this directory.
 - Navigate to the Part 1 folder:
   ```bash
   cd "Part 1 sea surfaced data"

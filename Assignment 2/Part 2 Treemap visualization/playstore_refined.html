@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic Loan Default Treemap</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <!-- AnyChart Library -->
+  <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-bundle.min.js"></script>
+  <!-- FusionCharts Library -->
+  <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/fusioncharts.js"></script>
+  <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/themes/fusioncharts.theme.fusion.js"></script>
+  <!-- CSS for styling -->
+  <link rel="stylesheet" type="text/css" href="val.css">
+  <style>
+    body {
+      background-color: #2A3950;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .controls {
+      margin-bottom: 20px;
+      background-color: #3A4A60;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .controls label {
+      display: block;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .controls select, .controls input[type="text"], .controls input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .controls .button {
+      background-color: #f64668;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      margin-top: 15px;
+      cursor: pointer;
+      border-radius: 20px;
+      font-size: 16px;
+    }
+    .controls .button:hover {
+      background-color: #ff7b53;
+    }
+    #map {
+      width: 90%;
+      height: 600px;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <label for="csvFileInput">Upload CSV:</label>
+    <input type="file" id="csvFileInput" accept=".csv" />
+
+    <label for="columnOrder">Select Columns for Hierarchy:</label>
+    <div id="columnSelectors">
+      <!-- Dynamic column selectors will be appended here -->
+    </div>
+    <button class="button" id="addColumn">Add Column</button>
+
+    <label for="chartLibrary">Select Chart Library:</label>
+    <select id="chartLibrary">
+      <option value="fusion">FusionCharts</option>
+      <option value="anychart">AnyChart</option>
+    </select>
+
+    <label for="layoutType" id="layoutTypeLabel">Tree Map Layout:</label>
+    <select id="layoutType">
+      <option value="squarified">Squarified</option>
+      <option value="sliceVertical">Slice and Dice (Vertical)</option>
+      <option value="sliceHorizontal">Slice and Dice (Horizontal)</option>
+      <option value="sliceAlternate">Slice and Dice (Alternate)</option>
+    </select>
+
+    <button class="button" id="generateButton">Generate Treemap</button>
+    <button class="button" id="clearButton">Clear</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    let dataset = [];
+    let columnsList = [];
+    let hierarchyColumns = [];
+    let defaultRateData = {};
+
+    // Handle file upload
+    document.getElementById("csvFileInput").addEventListener("change", async function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const text = await file.text();
+        dataset = d3.csvParse(text);
+        columnsList = dataset.columns.filter(col => col !== 'health_new');
+        populateColumnSelectors();
+        alert("CSV loaded successfully. You can now select hierarchy columns and generate the treemap.");
+      }
+    });
+
+    // Show or hide the layoutType dropdown based on chart library selection
+    document.getElementById("chartLibrary").addEventListener("change", function () {
+      const layoutTypeLabel = document.getElementById("layoutTypeLabel");
+      const layoutType = document.getElementById("layoutType");
+      if (this.value === "fusion") {
+        layoutTypeLabel.style.display = "block";
+        layoutType.style.display = "block";
+      } else {
+        layoutTypeLabel.style.display = "none";
+        layoutType.style.display = "none";
+      }
+    });
+
+    // Populate column selectors
+    function populateColumnSelectors() {
+      const columnSelectorsDiv = document.getElementById("columnSelectors");
+      columnSelectorsDiv.innerHTML = ''; // Clear existing selectors
+
+      // Initialize with one selector (you can add more if needed)
+      addColumnSelector();
+    }
+
+    // Add a column selector
+    document.getElementById("addColumn").addEventListener("click", function() {
+      addColumnSelector();
+    });
+
+    function addColumnSelector() {
+      const columnSelectorsDiv = document.getElementById("columnSelectors");
+      const select = document.createElement("select");
+      select.classList.add("hierarchySelect");
+
+      // Add options to the select element
+      select.innerHTML = '<option value="">--Select Column--</option>';
+      columnsList.forEach(col => {
+        select.innerHTML += `<option value="${col}">${col}</option>`;
+      });
+
+      columnSelectorsDiv.appendChild(select);
+    }
+
+    // Clear button functionality
+    document.getElementById("clearButton").addEventListener("click", function() {
+      document.getElementById("map").innerHTML = "";
+      document.getElementById("columnSelectors").innerHTML = '';
+      document.getElementById("layoutType").selectedIndex = 0;
+      document.getElementById("chartLibrary").selectedIndex = 0;
+      hierarchyColumns = [];
+      alert("Cleared all selections.");
+    });
+
+    // Generate Treemap
+    document.getElementById("generateButton").addEventListener("click", function() {
+      // Get selected hierarchy columns
+      const selects = document.querySelectorAll(".hierarchySelect");
+      hierarchyColumns = Array.from(selects).map(select => select.value).filter(val => val !== "");
+      
+      if (hierarchyColumns.length === 0) {
+        alert("Please select at least one column for hierarchy.");
+        return;
+      }
+
+      // Get layout type
+      const layoutType = document.getElementById("layoutType").value;
+
+      // Get chart library
+      const chartLibrary = document.getElementById("chartLibrary").value;
+
+      // Process data
+      const hierarchicalData = buildHierarchy(dataset, hierarchyColumns);
+
+      // Render treemap
+      if (chartLibrary === "fusion") {
+        const hierarchicalData = buildFusionHierarchy(dataset, hierarchyColumns);
+        console.log(hierarchicalData);
+        let algorithm = "squarified";
+        let orientAlgorithm = "vertical";
+
+        if (layoutType === "squarified") {
+            algorithm = "squarified";
+        } else if (layoutType === "sliceHorizontal") {
+            algorithm = "sliceanddice";
+            orientAlgorithm = "horizontal";
+        } else if (layoutType === "sliceVertical") {
+            algorithm = "sliceanddice";
+            orientAlgorithm = "vertical";
+        } else if (layoutType === "sliceAlternate") {
+            algorithm = "sliceanddice";
+            orientAlgorithm = "alternate";
+        }
+        loadFusionTreemap(hierarchicalData, algorithm, orientAlgorithm);
+      } else if (chartLibrary === "anychart") {
+        loadAnyChartTreemap(hierarchicalData);
+      }
+    });
+
+    // Function to build hierarchical data with default rates
+    function buildHierarchy(data, columns) {
+      const root = [{ name: "Root", children: [] }];
+
+      data.forEach(row => {
+        let currentNode = root[0];
+        columns.forEach(col => {
+          let child = currentNode.children.find(c => c.name === row[col]);
+          if (!child) {
+            child = { name: row[col], children: [] };
+            currentNode.children.push(child);
+          }
+          currentNode = child;
+        });
+        // At the leaf node, accumulate default counts
+        if (!currentNode.defaulters) {
+          currentNode.defaulters = 0;
+          currentNode.total = 0;
+        }
+        
+        // Ensure proper checking for Free and Editors Choice (True/False values)
+        if ((row['Free'] === 'True' || row['Free'] === true || row['Free'] === 1)) {
+          currentNode.defaulters += 1;
+        }
+
+        if ((row['Editors Choice'] === 'True' || row['Editors Choice'] === true || row['Editors Choice'] === 1)) {
+          currentNode.defaulters += 1;
+        }
+        
+        currentNode.total += 1;
+      });
+
+      // Function to calculate default rates recursively
+      function calculateRates(node) {
+        if (node.children && node.children.length > 0) {
+          node.children.forEach(child => calculateRates(child));
+          // Aggregate defaulters and total from children
+          node.defaulters = node.children.reduce((sum, child) => sum + (child.defaulters || 0), 0);
+          node.total = node.children.reduce((sum, child) => sum + (child.total || 0), 0);
+        }
+        if(node.children.length==0){
+            node.size = node.defaulters;
+        }
+        node.default_rate = node.total > 0 ? node.defaulters / node.total : 0;
+        node.default_rate = node.default_rate * 100;
+        node.default_rate = parseFloat(node.default_rate.toFixed(2));
+        if (node.children.length == 0) {
+            node.value = node.default_rate;
+        }
+      }
+
+      calculateRates(root[0]);
+      return root;
+    }
+
+    function buildFusionHierarchy(dataset, columns) {
+      const root = [{ "label": "Root", "data": [], "fillcolor": "#999999", "showLabel": "1", "fontColor": "#000000" }];
+      dataset.forEach(row => {
+        let currentNode = root[0];
+        columns.forEach(col => {
+          let child = currentNode.data.find(c => c.label === row[col]);
+          if (!child) {
+            child = { label: row[col], data: [] };
+            currentNode.data.push(child);
+          }
+          currentNode = child;
+        });
+        // At the leaf node, accumulate default counts
+        if (!currentNode.defaulters) {
+          currentNode.defaulters = 0;
+          currentNode.total = 0;
+        }
+        
+        // Ensure proper checking for Free and Editors Choice (True/False values)
+        if ((row['Free'] === 'True' || row['Free'] === true || row['Free'] === 1)) {
+          currentNode.defaulters += 1;
+        }
+
+        if ((row['Editors Choice'] === 'True' || row['Editors Choice'] === true || row['Editors Choice'] === 1)) {
+          currentNode.defaulters += 1;
+        }
+        
+        currentNode.total += 1;
+      });
+
+      // Function to calculate default rates recursively
+      function calculateRates(node) {
+        if (node.data && node.data.length > 0) {
+          node.data.forEach(child => calculateRates(child));
+          // Aggregate defaulters and total from children
+          node.defaulters = node.data.reduce((sum, child) => sum + (child.defaulters || 0), 0);
+          node.total = node.data.reduce((sum, child) => sum + (child.total || 0), 0);
+        }
+        node.value = node.defaulters; // value -> size
+        node.default_rate = node.total > 0 ? node.defaulters / node.total : 0;
+        node.default_rate = node.default_rate * 100;
+        node.default_rate = parseFloat(node.default_rate.toFixed(2));
+
+        node.svalue = node.default_rate; // for color scale
+      }
+
+      calculateRates(root[0]);
+      return root;
+    }
+
+    function loadAnyChartTreemap(hierarchicalData) {
+        console.log("Any Chart", hierarchicalData);
+        // Convert the data to AnyChart's tree structure
+        var treeData = anychart.data.tree(hierarchicalData, "as-tree");
+        var chart = anychart.treeMap(treeData);
+        // Chart customization
+        chart.hintDepth(1);
+        chart.maxDepth(2);
+        chart.hintOpacity(0.7);
+
+        chart.hovered().fill("silver", 0.2);
+        chart.selected().fill("silver", 0.6);
+        chart.selected().hatchFill("backward-diagonal", "silver", 2, 20);
+        chart.normal().stroke("silver");
+        chart.hovered().stroke("black", 2);
+        chart.selected().stroke("black", 2);
+
+        var customColorScale = anychart.scales.linearColor();
+        chart.background().fill("#2A3950");
+
+        // Color scale for better visualization on dark background
+        let scale = [
+            "#692A99",
+            "#980463",
+            "#f64668",
+            "#ff7b53"
+        ];
+        customColorScale.colors(scale.reverse());
+        chart.colorScale(customColorScale);
+
+        // Customize labels and tooltips
+        chart.labels().fontColor("#f5f5f5");
+        chart.colorRange().enabled(true);
+        chart.colorRange().length("90%");
+        chart.title().useHtml(true);
+        chart.title("<span style='font-size:18; font-style:bold'>Treemap Visualization</span><br><i><span style='font-size:14;'>Loan Default Analysis</span></i>");
+        chart.tooltip().useHtml(true);
+        chart.tooltip().format("Default Rate: {%default_rate}% <br><i>Number of Defaulters: {%total}</i>");
+        chart.labels().useHtml(true);
+        chart.labels().format("<span style='font-weight:bold'>{%name}</span><br>Default Rate: {%default_rate}%");
+
+        // Render the chart
+        chart.container("map");
+        chart.draw();
+    }
+
+    function loadFusionTreemap(dataPassed, algorithm, orientAlgorithm) {
+        console.log("hi");
+        console.log(algorithm, orientAlgorithm, dataPassed);
+
+        const chartConfig = {
+            type: 'treemap',
+            renderAt: 'map',
+            width: '100%',
+            height: '100%',
+            dataFormat: 'json',
+            dataSource: {
+                "chart": {
+                    "plotfillalpha": "80",
+                    "bgColor": "2A3950",
+                    "parentLabelLineHeight": "20",
+                    "hideTitle": "1",
+                    "labelFontColor": "000000",
+                    "labelFontSize": "15",
+                    "labelGlow": "0",
+                    "labelFont": "Arial",
+                    "showChildLabels": "1",
+                    "showParent": "1",
+                    "showLegend": "1",
+                    "plotTooltext": "<b>$label</b><br>Default Rate: <b>$svalue %</b><br>Number of Defaulters: <b>$value</b>",
+                    "hoverfillcolor": "CCCCCC",
+                    "hoverfillalpha": "50",
+                    "algorithm": algorithm,
+                    "slicingmode": orientAlgorithm,
+                    "caption": "Loan Default Analysis",
+                    "subcaption": "Treemap showing hierarchical default data",
+                    "subcaptionFontBold": "0",
+                    "subcaptionGlow": "0",
+                    "subcaptionFontSize": "14",
+                    "subcaptionFontColor": "FFFFFF",
+                    "captionFontColor": "FFFFFF",
+                    "captionFontSize": "20",
+                    "captionGlow": "0",
+                    "theme": "fusion",
+                },
+                "data": dataPassed,
+                "colorrange": {
+                    "mapbypercent": "0",
+                    "gradient": "1",
+                    "minvalue": "0",
+                    "code": "F1c18E",
+                    "color": [
+                        {
+                            "code": "F98477",
+                            "maxvalue": "25",
+                        },
+                        {
+                            "code": "EA4F88",
+                            "maxvalue": "50",
+                        },
+                        {
+                            "code": "B1339E",
+                            "maxvalue": "75",
+                        },
+                        {
+                            "code": "692A99",
+                            "maxvalue": "100",
+                        }
+                    ]
+                }
+            }
+        };
+
+        var fusioncharts = new FusionCharts(chartConfig);
+        fusioncharts.render();
+    }
+  </script>
+</body>
+</html>

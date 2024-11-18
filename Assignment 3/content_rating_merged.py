@@ -5,9 +5,10 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os  # Import for folder creation
 
 # Load dataset (replace 'dataset.csv' with your actual dataset path)
-df = pd.read_csv('dataset.csv')
+df = pd.read_csv('Google-Playstore-Preprocessed.csv')
 
 # Overview of dataset
 print("Dataset Overview:")
@@ -40,7 +41,15 @@ plt.ylabel('Number of Apps', fontsize=14)
 plt.xticks(rotation=90)
 plt.legend(title='Content Rating', title_fontsize='13', fontsize='12')
 plt.tight_layout()
-plt.show()
+
+# Create the output folder if it doesn't exist
+output_folder = "output_for_content_rating"
+os.makedirs(output_folder, exist_ok=True)
+
+# Save the visualization with user-provided name
+file_name = input("Enter the file name to save the initial visualization (e.g., 'initial_visualization.png'): ")
+plt.savefig(os.path.join(output_folder, file_name))
+# plt.show()
 
 # ### Step 4: Feedback Loop for User Interaction (Iteration 1)
 
@@ -76,7 +85,11 @@ plt.ylabel('Number of Apps', fontsize=14)
 plt.xticks(rotation=90)
 plt.legend(title='Content Rating', title_fontsize='13', fontsize='12')
 plt.tight_layout()
-plt.show()
+
+# Save the updated visualization with user-provided name
+file_name = input("Enter the file name to save the visualization after Feedback Iteration 1 (e.g., 'feedback_iteration_1.png'): ")
+plt.savefig(os.path.join(output_folder, file_name))
+# plt.show()
 
 # ### Step 5: Second Feedback Loop for User Interaction (Iteration 2)
 
@@ -112,4 +125,8 @@ plt.ylabel('Number of Apps', fontsize=14)
 plt.xticks(rotation=90)
 plt.legend(title='Content Rating', title_fontsize='13', fontsize='12')
 plt.tight_layout()
-plt.show()
+
+# Save the final visualization with user-provided name
+file_name = input("Enter the file name to save the visualization after Feedback Iteration 2 (e.g., 'feedback_iteration_2.png'): ")
+plt.savefig(os.path.join(output_folder, file_name))
+# plt.show()

@@ -2,200 +2,145 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix
-from sklearn.preprocessing import LabelEncoder
-import plotly.express as px
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
+from sklearn.model_selection import GridSearchCV
+import plotly.express as px
 import os
 
 # Create the output directory if it doesn't exist
-if not os.path.exists('output_for_random_classifier'):
-    os.makedirs('output_for_random_classifier')
+if not os.path.exists('output_for_enhanced_analysis'):
+    os.makedirs('output_for_enhanced_analysis')
 
 # Load the dataset
-df = pd.read_csv('Google-Playstore-Preprocessed.csv')
+df = pd.read_csv(r'/content/drive/MyDrive/Assignment 3 New Attempt/Google-Playstore-Preprocessed.csv')
 
 # Data Preprocessing
+# Handle missing or invalid values
 df['Price'] = df['Price'].replace('0', np.nan)  # Replace '0' with NaN for Price column
 df['Price'] = df['Price'].apply(lambda x: x.replace('$', '') if isinstance(x, str) else x)
 df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
 
-# Fill missing values for Rating and Rating Count
 imputer = SimpleImputer(strategy="mean")
 df['Rating'] = imputer.fit_transform(df[['Rating']])
+df['Size'] = df['Size'].fillna(df['Size'].median())  # Replace with non-inplace method
 
-# Convert categorical variables to numerical using LabelEncoder for some columns
-le = LabelEncoder()
-df['Content Rating'] = le.fit_transform(df['Content Rating'])
+# Convert problematic columns to ensure numeric-only correlation matrix
+non_numeric_columns = df.select_dtypes(exclude=['number']).columns
+df[non_numeric_columns] = df[non_numeric_columns].apply(lambda x: pd.factorize(x)[0])
 
-# Map boolean-like columns (Free, Ad Supported, In App Purchases, Editor's Choice) to 1/0
-df['Free'] = df['Free'].map({'True': 1, 'False': 0})
-df['Ad Supported'] = df['Ad Supported'].map({'True': 1, 'False': 0})
-df['In App Purchases'] = df['In App Purchases'].map({'True': 1, 'False': 0})
-df['Editors Choice'] = df['Editors Choice'].map({'True': 1, 'False': 0})
+# Encode categorical variables
+categorical_columns = ['Category', 'Content Rating', 'Ad Supported', 'In App Purchases', 'Editors Choice']
+df = pd.get_dummies(df, columns=categorical_columns, drop_first=True)
 
-# Fill missing 'Size' by filling NaN with the median size (for simplicity)
-df['Size'].fillna(df['Size'].median(), inplace=True)
+# Feature Engineering
+# Create derived features
+df['Installs Range'] = df['Maximum Installs'] - df['Minimum Installs']
+df['Price Category'] = pd.cut(df['Price'].fillna(0), bins=[0, 1, 10, 50, np.inf], labels=['Free', 'Low', 'Medium', 'High'])
+df = pd.get_dummies(df, columns=['Price Category'], drop_first=True)
 
-# Select features for statistical analysis and classification
-features = ['Rating', 'Rating Count', 'Minimum Installs', 'Maximum Installs', 'Price', 'Size', 'Content Rating']
+# Normalize numerical features
+scaler = StandardScaler()
+num_features = ['Rating Count', 'Price', 'Size', 'Installs Range']
+df[num_features] = scaler.fit_transform(df[num_features])
 
-# Bar Chart: Average Ratings per Content Rating Group
-def plot_avg_ratings_by_content_rating(df):
-    avg_ratings = df.groupby('Content Rating')['Rating'].mean().sort_values(ascending=False)
-    avg_ratings.plot(kind='bar', figsize=(10, 6))
-    plt.title('Average Rating by Content Rating')
-    plt.xlabel('Content Rating')
-    plt.ylabel('Average Rating')
-    plt.savefig("output_for_random_classifier/avg_ratings_by_content_rating.png")
-    plt.close()
-
-# Heatmap: Success metrics (Installs, Ratings) across different Content Ratings
-def plot_success_heatmap(df):
-    content_rating_group = df.groupby('Content Rating')[['Rating', 'Minimum Installs']].mean()
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(content_rating_group, annot=True, cmap='YlGnBu', fmt='.2f')
-    plt.title('Success Metrics (Rating & Installs) by Content Rating')
-    plt.savefig("output_for_random_classifier/success_metrics_heatmap.png")
-    plt.close()
-
-# Initial Visualization and Inference
-plot_avg_ratings_by_content_rating(df)
-plot_success_heatmap(df)
-
-# Inference: From the heatmap, we can see that content rating types like 'Everyone' and 'Teen' have a higher average rating, which could be important for model prediction.
-
-# Apply Classification Models to Predict App Success
-# Create a binary target variable: 'Success' (1 if rating > 4 and installs > 1000000, else 0)
+# Define binary target variable: 'Success'
 df['Success'] = ((df['Rating'] > 4) & (df['Minimum Installs'] > 1000000)).astype(int)
 
-# Features for Classification
-X = df[['Rating', 'Rating Count', 'Minimum Installs', 'Maximum Installs', 'Price', 'Size', 'Content Rating']]
+# Features and target
+all_features = [col for col in df.columns if col not in ['Success', 'Rating', 'Minimum Installs', 'Maximum Installs']]
+X = df[all_features]
 y = df['Success']
 
 # Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# Train Random Forest Classifier
-def train_classification_model(X_train, X_test, y_train, y_test):
-    rf = RandomForestClassifier(random_state=42)
-    rf.fit(X_train, y_train)
+# Initial Visualization
+# Correlation Matrix Heatmap
+plt.figure(figsize=(12, 8))
+sns.heatmap(df.corr(), annot=False, cmap='coolwarm')
+plt.title('Correlation Matrix')
+plt.savefig("output_for_enhanced_analysis/correlation_matrix.png")
+plt.close()
+
+# Distribution Plots
+for col in ['Price', 'Rating', 'Size']:
+    plt.figure(figsize=(8, 6))
+    sns.histplot(df[col].dropna(), kde=True, bins=30)
+    plt.title(f'Distribution of {col}')
+    plt.savefig(f"output_for_enhanced_analysis/distribution_{col}.png")
+    plt.close()
+
+# Model Training and Comparison
+def train_and_compare_models(X_train, X_test, y_train, y_test):
+    models = {
+        'Random Forest': RandomForestClassifier(random_state=42),
+        'Logistic Regression': LogisticRegression(max_iter=1000, random_state=42)
+    }
     
-    # Predictions
-    y_pred = rf.predict(X_test)
+    results = {}
+    for name, model in models.items():
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        results[name] = accuracy
+        
+        print(f"{name} Accuracy: {accuracy:.2f}")
+        print(classification_report(y_test, y_pred))
+        
+    return results
+
+results = train_and_compare_models(X_train, X_test, y_train, y_test)
+
+# Hyperparameter Tuning for Random Forest
+def tune_hyperparameters(X_train, y_train):
+    param_grid = {
+        'n_estimators': [50, 100, 200],
+        'max_depth': [10, 20, None],
+        'min_samples_split': [2, 5, 10]
+    }
     
-    # Accuracy and Confusion Matrix
+    grid_search = GridSearchCV(RandomForestClassifier(random_state=42), param_grid, cv=3, scoring='accuracy')
+    grid_search.fit(X_train, y_train)
+    
+    print("Best Parameters:", grid_search.best_params_)
+    print("Best Score:", grid_search.best_score_)
+    
+    return grid_search.best_estimator_
+
+best_rf_model = tune_hyperparameters(X_train, y_train)
+
+# Evaluate the tuned model
+def evaluate_model(model, X_test, y_test):
+    y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     cm = confusion_matrix(y_test, y_pred)
-    
-    # Displaying results
-    print(f"Model Accuracy: {accuracy * 100:.2f}%")
+
+    print(f"Model Accuracy: {accuracy:.2f}")
     print("Confusion Matrix:")
     print(cm)
-    
-    # Save confusion matrix as a plot
+
+    # Save confusion matrix plot
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Not Success', 'Success'], yticklabels=['Not Success', 'Success'])
     plt.title('Confusion Matrix')
     plt.xlabel('Predicted')
     plt.ylabel('True')
-    plt.savefig("output_for_random_classifier/confusion_matrix.png")
+    plt.savefig("output_for_enhanced_analysis/confusion_matrix_tuned.png")
     plt.close()
-    
-    return rf, accuracy, cm
 
-# Train the initial classification model
-rf_model, accuracy, cm = train_classification_model(X_train, X_test, y_train, y_test)
+    return accuracy
 
-# Feedback Loop 1: User interaction to adjust model parameters based on initial analysis
-def feedback_loop_1():
-    n_estimators = int(input("Enter the number of estimators for the Random Forest Classifier: "))
-    max_depth = int(input("Enter the maximum depth for the Random Forest Classifier: "))
-    
-    rf = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
-    rf.fit(X_train, y_train)
-    
-    # Predictions
-    y_pred = rf.predict(X_test)
-    
-    # Accuracy and Confusion Matrix
-    accuracy = accuracy_score(y_test, y_pred)
-    cm = confusion_matrix(y_test, y_pred)
-    
-    print(f"Refined Model Accuracy: {accuracy * 100:.2f}%")
-    print("Refined Confusion Matrix:")
-    print(cm)
-    
-    # Save refined confusion matrix as a plot
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Not Success', 'Success'], yticklabels=['Not Success', 'Success'])
-    plt.title('Refined Confusion Matrix')
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    plt.savefig("output_for_random_classifier/refined_confusion_matrix.png")
-    plt.close()
-    
-    return rf, accuracy, cm
+accuracy = evaluate_model(best_rf_model, X_test, y_test)
 
-# Run the first feedback loop
-rf_model, accuracy, cm = feedback_loop_1()
-
-# Feedback Loop 2: User interaction to include or exclude features for the model
-def feedback_loop_2():
-    print("Current features: Rating, Rating Count, Minimum Installs, Maximum Installs, Price, Size, Content Rating")
-    include_rating_count = input("Would you like to include 'Rating Count' as a feature? (yes/no): ").lower()
-    
-    if include_rating_count == 'no':
-        X_new = X.drop(columns=['Rating Count'])
-    else:
-        X_new = X
-    
-    # Re-split the data
-    X_train, X_test, y_train, y_test = train_test_split(X_new, y, test_size=0.3, random_state=42)
-    
-    # Train Random Forest Classifier with new features
-    rf = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
-    rf.fit(X_train, y_train)
-    
-    # Predictions
-    y_pred = rf.predict(X_test)
-    
-    # Accuracy and Confusion Matrix
-    accuracy = accuracy_score(y_test, y_pred)
-    cm = confusion_matrix(y_test, y_pred)
-    
-    print(f"Refined Model with New Features Accuracy: {accuracy * 100:.2f}%")
-    print("Refined Confusion Matrix:")
-    print(cm)
-    
-    # Save refined confusion matrix as a plot
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Not Success', 'Success'], yticklabels=['Not Success', 'Success'])
-    plt.title('Refined Confusion Matrix (New Features)')
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-    plt.savefig("output_for_random_classifier/refined_confusion_matrix_new_features.png")
-    plt.close()
-    
-    return rf, accuracy, cm
-
-# Run the second feedback loop
-rf_model, accuracy, cm = feedback_loop_2()
-
-# Final visualizations after feedback
-plot_avg_ratings_by_content_rating(df)
-plot_success_heatmap(df)
-
-# Add dynamic Plotly visualizations for user interaction
+# Interactive Visualization with Plotly
 def plot_dynamic_visualization(df):
-    fig = px.scatter(df, x='Minimum Installs', y='Rating', color='Content Rating', 
-                     size='Size', hover_data=['Price'])
-    fig.update_layout(title='App Ratings vs Minimum Installs by Content Rating',
-                      xaxis_title='Minimum Installs',
-                      yaxis_title='Rating')
+    fig = px.scatter(df, x='Minimum Installs', y='Rating', color='Category_Tools', 
+                     size='Size', hover_data=['Price'], title='App Ratings vs Minimum Installs')
     fig.show()
 
-# Interactive Plotly visualization for deeper insight after user feedback
 plot_dynamic_visualization(df)

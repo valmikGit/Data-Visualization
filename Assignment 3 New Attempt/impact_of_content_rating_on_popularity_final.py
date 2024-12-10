@@ -13,7 +13,7 @@ output_dir = "output_visualizations"
 os.makedirs(output_dir, exist_ok=True)
 
 # Step 1: Load dataset
-data = pd.read_csv("/content/drive/MyDrive/DV Assignment 3/Google-Playstore-Preprocessed.csv")  # Replace with your dataset
+data = pd.read_csv("Google-Playstore-Preprocessed.csv")  # Replace with your dataset
 
 # Ensure necessary columns exist
 required_columns = ["Content Rating", "Maximum Installs"]

@@ -1,4 +1,4 @@
-# To run the file:
+# To create the visualizations:
 - Make a Python virtual environment.
   ```bash
   python -m venv dvenv
